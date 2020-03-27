@@ -1,0 +1,6 @@
+framework module SWNetwork {
+  umbrella header "SWNetwork-umbrella.h"
+
+  export *
+  module * { export * }
+}
