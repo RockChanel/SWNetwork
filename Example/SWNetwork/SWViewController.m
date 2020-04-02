@@ -7,8 +7,11 @@
 //
 
 #import "SWViewController.h"
+#import "SWRequestViewController.h"
 
-@interface SWViewController ()
+@interface SWViewController () <UITableViewDelegate, UITableViewDataSource>
+
+@property (nonatomic, strong) NSArray *datas;
 
 @end
 
@@ -18,6 +21,40 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
+    self.navigationItem.title = @"SWNetwork";
+    
+    self.datas = @[
+        @{@"title": @"通用请求"},
+        @{@"title": @"上传下载"},
+        @{@"title": @"断点续传、断点下载"}
+    ];
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return self.datas.count;
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    static NSString *cellId = @"cellId";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellId];
+    if (!cell) {
+        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellId];
+    }
+    cell.textLabel.text = self.datas[indexPath.row][@"title"];
+    return cell;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    switch (indexPath.row) {
+        case 0:
+        {
+            SWRequestViewController *requestVC = [[SWRequestViewController alloc] init];
+            [self.navigationController pushViewController:requestVC animated:YES];
+        }
+            break;
+        default:
+            break;
+    }
 }
 
 - (void)didReceiveMemoryWarning

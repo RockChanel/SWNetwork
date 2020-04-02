@@ -13,9 +13,9 @@
 #import "SWBatchChainRequest.h"
 #import "SWBatchRequest.h"
 #import "SWChainRequest.h"
+#import "SWNetwork.h"
 #import "SWNetworkAgent.h"
 #import "SWNetworkConfiguration.h"
-#import "SWNetworking.h"
 #import "SWNetworkManager.h"
 #import "SWRequest.h"
 

@@ -555,6 +555,7 @@ static dispatch_queue_t request_completion_callback_queue() {
     if (request.baseURL && request.baseURL.length > 0) {
         baseURL = request.baseURL;
     } else {
+        request.baseURL = _configuration.baseURL;
         baseURL = _configuration.baseURL;
     }
     NSURL *url = [NSURL URLWithString:baseURL];

@@ -7,12 +7,18 @@
 //
 
 #import "SWAppDelegate.h"
+#import <SWNetwork.h>
 
 @implementation SWAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     // Override point for customization after application launch.
+    
+    // 设置baseURL
+    [SWNetworkConfiguration sharedConfiguration].baseURL = @"https://ditu.amap.com/";
+    // 设置全局请求的超时时间
+    [SWNetworkConfiguration sharedConfiguration].timeoutInterval = 15;
     return YES;
 }
 

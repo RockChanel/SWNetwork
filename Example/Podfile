@@ -4,6 +4,7 @@ platform :ios, '8.0'
 
 target 'SWNetwork_Example' do
   pod 'SWNetwork', :path => '../'
+  pod 'MBProgressHUD', '~> 1.2.0'
 
   target 'SWNetwork_Tests' do
     inherit! :search_paths

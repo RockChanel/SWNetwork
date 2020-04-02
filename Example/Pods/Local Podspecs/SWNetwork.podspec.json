@@ -1,7 +1,7 @@
 {
   "name": "SWNetwork",
   "version": "1.0.0",
-  "summary": "A short description of SWNetwork.",
+  "summary": "SWNetwork is a request util based on AFNetworking.",
   "description": "TODO: Add long description of the pod here.",
   "homepage": "https://github.com/RockChanel/SWNetwork",
   "license": {
