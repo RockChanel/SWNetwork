@@ -19,6 +19,9 @@
 @property (nonatomic, strong) NSMutableArray <SWRequest *> *requests;
 /// 所有请求执行完下一步回调
 @property (strong, nonatomic) NSMutableArray <SWNextChainRequestBlock> *nextBlocks;
+
+@property (nonatomic, strong) SWNextChainRequestBlock emptyBlock;
+
 @end
 
 @implementation SWChainRequest
@@ -33,22 +36,24 @@
         _nextRequestIndex = 0;
         _requests = [NSMutableArray array];
         _nextBlocks = [NSMutableArray array];
+        _emptyBlock = ^(SWRequest * _Nullable previousRequest) {
+            
+        };
     }
     return self;
 }
 
-- (SWChainRequest *)next:(SWNextChainRequestBlock)block {
-    // The block can not be nil.
-    NSParameterAssert(block != nil);
-    SWRequest *nextRequest = [SWRequest request];
-    if (0 == _requests.count) {
-        // If have not added a request, callback immediately. The previous request here is nil.
-        // 如果第一次添加请求，则立即先执行回调
-        block(nil, nextRequest);
+- (void)nextRequest:(SWRequest *)request block:(SWNextChainRequestBlock)block {
+    // request can not be nil. 请求不能为空
+    NSParameterAssert(request != nil);
+    
+    [_requests addObject:request];
+    if (block != nil) {
+        [_nextBlocks addObject:block];
     }
-    [_requests addObject:nextRequest];
-    [_nextBlocks addObject:block];
-    return self;
+    else {
+        [_nextBlocks addObject:_emptyBlock];
+    }
 }
 
 - (void)start {
@@ -112,12 +117,14 @@
  @param request 对应的请求
  */
 - (void)requestSuccessed:(SWRequest *)request {
+
+    NSInteger currentRequestIndex = _nextRequestIndex - 1;
+    SWNextChainRequestBlock currentBlock = _nextBlocks[currentRequestIndex];
+    // SWRequest *nextRequest = _requests[_nextRequestIndex];
+    currentBlock(request);
+    
     if (_nextRequestIndex < _requests.count) {
-        // 若索引值小于请求个数，则链式请求还未完成
-        SWNextChainRequestBlock nextBlock = _nextBlocks[_nextRequestIndex];
-        SWRequest *nextRequest = _requests[_nextRequestIndex];
-        nextBlock(request, nextRequest);
-        // 继续下一个请求
+        // 若索引值小于请求个数，则链式请求还未完成，继续下一个请求
         [self startNextRequest];
     }
     else {

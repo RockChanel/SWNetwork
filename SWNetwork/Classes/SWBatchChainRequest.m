@@ -18,6 +18,9 @@
 @property (nonatomic, strong) NSMutableArray <SWBatchRequest *> *requests;
 /// All the next callbacks.
 @property (strong, nonatomic) NSMutableArray <SWNextBatchChainRequestBlock> *nextBlocks;
+
+@property (nonatomic, strong) SWNextBatchChainRequestBlock emptyBlock;
+
 @end
 
 @implementation SWBatchChainRequest
@@ -36,21 +39,24 @@
         _nextRequestIndex = 0;
         _requests = [NSMutableArray array];
         _nextBlocks = [NSMutableArray array];
+        _emptyBlock = ^(SWBatchRequest * _Nonnull currentRequest) {
+            
+        };
     }
     return self;
 }
 
-- (SWBatchChainRequest *)next:(SWNextBatchChainRequestBlock)block {
-    // The block can not be nil.
-    NSParameterAssert(block != nil);
-    SWBatchRequest *nextRequest = [SWBatchRequest request];
-    if (0 == _requests.count) {
-        // If have not added a batch request, callback immediately. The previous request here is nil.
-        block(nil, nextRequest);
+- (void)nextRequest:(SWBatchRequest *)request block:(SWNextBatchChainRequestBlock)block {
+    // request can not be nil. 请求不能为空
+    NSParameterAssert(request != nil);
+        
+    [_requests addObject:request];
+    if (block != nil) {
+        [_nextBlocks addObject:block];
     }
-    [_requests addObject:nextRequest];
-    [_nextBlocks addObject:block];
-    return self;
+    else {
+        [_nextBlocks addObject:_emptyBlock];
+    }
 }
 
 - (void)start {
@@ -109,10 +115,12 @@
 }
 
 - (void)batchRequestSuccessed:(SWBatchRequest *)request {
+    
+    NSInteger currentRequestIndex = _nextRequestIndex - 1;
+    SWNextBatchChainRequestBlock currentBlock = _nextBlocks[currentRequestIndex];
+    currentBlock(request);
+    
     if (_nextRequestIndex < _requests.count) {
-        SWNextBatchChainRequestBlock nextBlock = _nextBlocks[_nextRequestIndex];
-        SWBatchRequest *nextRequest = _requests[_nextRequestIndex];
-        nextBlock(request, nextRequest);
         [self startNextRequest];
     }
     else {

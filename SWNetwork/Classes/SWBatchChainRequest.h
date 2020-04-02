@@ -18,10 +18,9 @@ typedef void (^SWBatchChainRequestCompletionBlock)(SWBatchChainRequest *request)
  \~english
  Add batch request callback block.
 
- @param previousRequest The previous request. This value is actually nil while the request added for the first time.
- @param nextRequest The request which will be excuted.
+ @param currentRequest The current request. 
  */
-typedef void (^SWNextBatchChainRequestBlock)(SWBatchRequest * _Nullable previousRequest, SWBatchRequest *nextRequest);
+typedef void (^SWNextBatchChainRequestBlock)(SWBatchRequest *currentRequest);
 
 /**
  \~chinese
@@ -214,7 +213,7 @@ typedef void (^SWNextBatchChainRequestBlock)(SWBatchRequest * _Nullable previous
  \~english
  Add batch request to request chain.
  */
-- (SWBatchChainRequest *)next:(SWNextBatchChainRequestBlock)block;
+- (void)nextRequest:(SWBatchRequest *)request block:(SWNextBatchChainRequestBlock)block;
 
 @end
 

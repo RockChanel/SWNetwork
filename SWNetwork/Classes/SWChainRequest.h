@@ -14,14 +14,16 @@ NS_ASSUME_NONNULL_BEGIN
 
 typedef void (^SWChainRequestCompletionBlock)(SWChainRequest *request);
 
-/** 
+/**
+ \~chinese
+ 添加请求的回调
+ 
  \~english
  Add request callback block.
 
- @param previousRequest The previous request. This value is actually nil while the request added for the first time.
- @param nextRequest The request which will be excuted.
+ @param currentRequest The current request.
  */
-typedef void (^SWNextChainRequestBlock)(SWRequest * _Nullable previousRequest, SWRequest *nextRequest);
+typedef void (^SWNextChainRequestBlock)(SWRequest *currentRequest);
 
 /**
  \~chinese
@@ -214,7 +216,7 @@ typedef void (^SWNextChainRequestBlock)(SWRequest * _Nullable previousRequest, S
  \~english
  Add request to request chain.
  */
-- (SWChainRequest *)next:(SWNextChainRequestBlock)block;
+- (void)nextRequest:(SWRequest *)request block:(nullable SWNextChainRequestBlock)block;
 
 @end
 

@@ -31,7 +31,8 @@
         @{@"title": @"单个请求"},
         @{@"title": @"自定义单个请求"},
         @{@"title": @"并发请求"},
-        @{@"title": @"链式请求"}
+        @{@"title": @"链式请求"},
+        @{@"title": @"并发链式请求"}
     ];
 }
 
@@ -56,13 +57,16 @@
             break;
         case 1:
             [self customRequest];
-        break;
+            break;
         case 2:
             [self batchRequest];
-        break;
+            break;
         case 3:
             [self chainRequest];
-        break;
+            break;
+        case 4:
+            [self batchChainRequest];
+            break;
         default:
             break;
     }
@@ -167,25 +171,100 @@
 /// 链式请求
 - (void)chainRequest {
     
+    [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    
     [[SWNetworkAgent chainRequest:^(SWChainRequest * _Nonnull request) {
-        [[request next:^(SWRequest * _Nullable previousRequest, SWRequest * _Nonnull nextRequest) {
-            nextRequest.httpMethod = SWHTTPMethodGET;
-            nextRequest.path = @"service/regeo";
-            nextRequest.parameters = @{
-                @"longitude": @"119.04925573429551",
-                @"latitude": @"31.315590522490712"
-            };
-            nextRequest.tag = 100;
-        }] next:^(SWRequest * _Nullable previousRequest, SWRequest * _Nonnull nextRequest) {
+        
+        SWRequest *tmpReq1 = [SWRequest request];
+        tmpReq1.httpMethod = SWHTTPMethodGET;
+        tmpReq1.path = @"service/regeo";
+        tmpReq1.parameters = @{
+            @"longitude": @"119.04925573429551",
+            @"latitude": @"31.315590522490712"
+        };
+        tmpReq1.tag = 100;
+        [request nextRequest:tmpReq1 block:^(SWRequest * _Nonnull currentRequest) {
             
-           
+            NSLog(@"tmpReq1 == %@", currentRequest.responseObject);
+            
+            SWCustomRequest *tmpReq2 = [SWCustomRequest request];
+            tmpReq2.tag = 200;
+            [request nextRequest:tmpReq2 block:^(SWRequest * _Nonnull currentRequest) {
+                
+                NSLog(@"tmpReq2 == %@", currentRequest.responseObject);
+            }];
         }];
+        
     }] startWithSuccess:^(SWChainRequest * _Nonnull request) {
         
     } failure:^(SWChainRequest * _Nonnull request) {
         
     } completed:^(SWChainRequest * _Nonnull request) {
         
+        [MBProgressHUD hideHUDForView:self.view animated:YES];
+    }];
+}
+
+/// 并发链式请求
+- (void)batchChainRequest {
+    
+    [MBProgressHUD showHUDAddedTo:self.view animated:YES];
+    
+    [[SWNetworkAgent batchChainRequest:^(SWBatchChainRequest * _Nonnull request) {
+        
+        SWBatchRequest *batchReq1 = [SWBatchRequest request];
+        
+        NSMutableArray *requests = [NSMutableArray array];
+        
+        SWRequest *tmpReq1 = [SWRequest request];
+        tmpReq1.httpMethod = SWHTTPMethodGET;
+        tmpReq1.path = @"service/regeo";
+        tmpReq1.parameters = @{
+            @"longitude": @"119.04925573429551",
+            @"latitude": @"31.315590522490712"
+        };
+        tmpReq1.tag = 100;
+        [requests addObject:tmpReq1];
+        
+        SWCustomRequest *tmpReq2 = [SWCustomRequest request];
+        tmpReq2.tag = 200;
+        [requests addObject:tmpReq2];
+        batchReq1.requests = requests;
+        
+        [request nextRequest:batchReq1 block:^(SWBatchRequest * _Nonnull currentRequest) {
+            
+            
+            SWBatchRequest *batchReq2 = [SWBatchRequest request];
+                   
+            NSMutableArray *requests = [NSMutableArray array];
+                   
+            SWRequest *tmpReq1 = [SWRequest request];
+            tmpReq1.httpMethod = SWHTTPMethodGET;
+            tmpReq1.path = @"service/regeo";
+            tmpReq1.parameters = @{
+                       @"longitude": @"119.04925573429551",
+                       @"latitude": @"31.315590522490712"
+            };
+            tmpReq1.tag = 100;
+            [requests addObject:tmpReq1];
+                   
+            SWCustomRequest *tmpReq2 = [SWCustomRequest request];
+            tmpReq2.tag = 200;
+            [requests addObject:tmpReq2];
+            batchReq2.requests = requests;
+            
+            [request nextRequest:batchReq2 block:^(SWBatchRequest * _Nonnull currentRequest) {
+                
+            }];
+        }];
+        
+    }] startWithSuccess:^(SWBatchChainRequest * _Nonnull request) {
+        
+    } failure:^(SWBatchChainRequest * _Nonnull request) {
+        
+    } completed:^(SWBatchChainRequest * _Nonnull request) {
+        
+        [MBProgressHUD hideHUDForView:self.view animated:YES];
     }];
 }
 
