@@ -24,6 +24,7 @@
 		7883213421306824ADD1E782 /* Pods_SWNetwork_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB9D38A341CA33A82A4F70C6 /* Pods_SWNetwork_Example.framework */; };
 		873B8AEB1B1F5CCA007FD442 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 873B8AEA1B1F5CCA007FD442 /* Main.storyboard */; };
 		D9E372A084017896EDB8EA5E /* Pods_SWNetwork_Tests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7D06EA3BF223A87C5D4CE005 /* Pods_SWNetwork_Tests.framework */; };
+		EC43696224371FEB00451AB5 /* SWUpDownloadViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EC43696124371FEB00451AB5 /* SWUpDownloadViewController.m */; };
 		EC4888C8243496B900443B7D /* SWCustomRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = EC4888C7243496B900443B7D /* SWCustomRequest.m */; };
 		EC4888D32435837700443B7D /* SWRequestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EC4888D22435837700443B7D /* SWRequestViewController.m */; };
 /* End PBXBuildFile section */
@@ -69,6 +70,8 @@
 		C6B36E7B846C5A0EDA9EEFD3 /* Pods-SWNetwork_Tests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SWNetwork_Tests.debug.xcconfig"; path = "Target Support Files/Pods-SWNetwork_Tests/Pods-SWNetwork_Tests.debug.xcconfig"; sourceTree = "<group>"; };
 		DB9D38A341CA33A82A4F70C6 /* Pods_SWNetwork_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SWNetwork_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		E88115709C0C2CC692BFAA47 /* README.md */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		EC43696024371FEB00451AB5 /* SWUpDownloadViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SWUpDownloadViewController.h; sourceTree = "<group>"; };
+		EC43696124371FEB00451AB5 /* SWUpDownloadViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SWUpDownloadViewController.m; sourceTree = "<group>"; };
 		EC4888C6243496B900443B7D /* SWCustomRequest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SWCustomRequest.h; sourceTree = "<group>"; };
 		EC4888C7243496B900443B7D /* SWCustomRequest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SWCustomRequest.m; sourceTree = "<group>"; };
 		EC4888D12435837700443B7D /* SWRequestViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SWRequestViewController.h; sourceTree = "<group>"; };
@@ -145,6 +148,8 @@
 				6003F5A6195388D20070C39A /* SWViewController.m */,
 				EC4888D12435837700443B7D /* SWRequestViewController.h */,
 				EC4888D22435837700443B7D /* SWRequestViewController.m */,
+				EC43696024371FEB00451AB5 /* SWUpDownloadViewController.h */,
+				EC43696124371FEB00451AB5 /* SWUpDownloadViewController.m */,
 				EC4888D4243583DD00443B7D /* Requests */,
 				71719F9D1E33DC2100824A3D /* LaunchScreen.storyboard */,
 				6003F5A8195388D20070C39A /* Images.xcassets */,
@@ -391,6 +396,7 @@
 				EC4888C8243496B900443B7D /* SWCustomRequest.m in Sources */,
 				6003F59A195388D20070C39A /* main.m in Sources */,
 				EC4888D32435837700443B7D /* SWRequestViewController.m in Sources */,
+				EC43696224371FEB00451AB5 /* SWUpDownloadViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -77,6 +77,7 @@
         if ([SWNetworkConfiguration sharedConfiguration].isLogEnable) {
             NSLog(@"Error! Chain request array is empty.");
         }
+        [self clearCompletionBlock];
     }
 }
 

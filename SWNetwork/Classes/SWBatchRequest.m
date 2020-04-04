@@ -50,32 +50,25 @@
         return;
     }
     _failedRequest = nil;
-    if (0 == _requests.count) {
-        if ([_delegate respondsToSelector:@selector(batchRequestWillStop:)]) {
-            [_delegate batchRequestWillStop:self];
-        }
-        if ([_delegate respondsToSelector:@selector(batchRequestSuccessed:)]) {
-            [_delegate batchRequestSuccessed:self];
-        }
-        if (_successBlock) {
-            _successBlock(self);
-        }
-        if (_completedBlock) {
-            _completedBlock(self);
-        }
-        [self clearCompletionBlock];
-    }
     
-    [[SWNetworkAgent shareAgent] addBatchRequest:self];
-    // 发送所有请求
-    for (SWRequest *req in _requests) {
-        req.delegate = self;
-        [req clearCompletionBlock];
-        [req start];
+    if (_requests.count > 0) {
+        [[SWNetworkAgent shareAgent] addBatchRequest:self];
+        // 发送所有请求
+        for (SWRequest *req in _requests) {
+            req.delegate = self;
+            [req clearCompletionBlock];
+            [req start];
+        }
+        
+        if ([_delegate respondsToSelector:@selector(batchRequestDidStart:)]) {
+            [_delegate batchRequestDidStart:self];
+        }
     }
-    
-    if ([_delegate respondsToSelector:@selector(batchRequestDidStart:)]) {
-        [_delegate batchRequestDidStart:self];
+    else {
+        if ([SWNetworkConfiguration sharedConfiguration].isLogEnable) {
+            NSLog(@"Error! Batch request array is empty.");
+            [self clearCompletionBlock];
+        }
     }
 }
 
@@ -139,6 +132,9 @@
         }
         if (_successBlock) {
             _successBlock(self);
+        }
+        if ([_delegate respondsToSelector:@selector(batchRequestDidStop:)]) {
+            [_delegate batchRequestDidStop:self];
         }
         if (_completedBlock) {
             _completedBlock(self);

@@ -8,6 +8,7 @@
 
 #import "SWViewController.h"
 #import "SWRequestViewController.h"
+#import "SWUpDownloadViewController.h"
 
 @interface SWViewController () <UITableViewDelegate, UITableViewDataSource>
 
@@ -50,6 +51,12 @@
         {
             SWRequestViewController *requestVC = [[SWRequestViewController alloc] init];
             [self.navigationController pushViewController:requestVC animated:YES];
+        }
+            break;
+        case 1:
+        {
+            SWUpDownloadViewController *updownloadVC = [[SWUpDownloadViewController alloc] init];
+            [self.navigationController pushViewController:updownloadVC animated:YES];
         }
             break;
         default:

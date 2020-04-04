@@ -75,7 +75,7 @@
 /// 单个请求
 - (void)request {
     [MBProgressHUD showHUDAddedTo:self.view animated:YES];
-    
+
     [[SWNetworkAgent request:^(SWRequest * _Nonnull request) {
         // 请求配置
         request.httpMethod = SWHTTPMethodGET;
@@ -84,15 +84,15 @@
                                 @"longitude": @"119.04925573429551",
                                 @"latitude": @"31.315590522490712"
                                };
-        
+
     }] startWithSuccess:^(SWRequest * _Nonnull request) {
         NSLog(@"request === %@", request.responseObject);
-    
+
     } failure:^(SWRequest * _Nonnull request) {
         NSLog(@"request === %@", request.error);
-        
+
     } completed:^(SWRequest * _Nonnull request) {
-        
+
         [MBProgressHUD hideHUDForView:self.view animated:YES];
     }];
 }
