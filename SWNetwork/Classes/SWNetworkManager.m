@@ -9,6 +9,7 @@
 #import "SWNetworkManager.h"
 #import "SWNetworkConfiguration.h"
 #import "SWRequest.h"
+#import "SWFileManager.h"
 
 #if __has_include(<AFNetworking/AFNetworking.h>)
 #import <AFNetworking/AFNetworking.h>
@@ -19,6 +20,9 @@
 #import "AFNetworkActivityIndicatorManager.h"
 #import "AFURLResponseSerialization.h"
 #endif
+
+/// 未下载完成文件数据存放文件夹 ... /tmp/Incomplete
+#define kSWNetworkIncompleteDownloadFolderName @"Incomplete"
 
 #define LOCK() dispatch_semaphore_wait(self->_lock, DISPATCH_TIME_FOREVER)
 #define UNLOCK() dispatch_semaphore_signal(self->_lock)
@@ -33,24 +37,17 @@ static dispatch_queue_t request_completion_callback_queue() {
 }
 
 @interface SWNetworkManager()
-/// 信号量锁，用于资源竞争锁操作
+/// 信号量锁
 @property (strong, nonatomic, nonnull) dispatch_semaphore_t lock;
-/// Network configuration. 网络请求全局配置
+/// 网络请求全局配置
 @property (nonatomic, strong) SWNetworkConfiguration *configuration;
-/// Network manager.
+
 @property (nonatomic, strong) AFHTTPSessionManager *manager;
 /// json 参数编码的序列化器
 @property (nonatomic, strong) AFJSONResponseSerializer *jsonResponseSerializer;
 /// xml 参数编码的序列化器
 @property (nonatomic, strong) AFXMLParserResponseSerializer *xmlParserResponseSerialzier;
-
-/**
- \~chinese
- 请求池，维护当前所有请求
- 
- \~english
- The dictionry of all the requests. The key is task identifier.
- */
+/// 请求池，维护当前所有请求
 @property (nonatomic, strong) NSMutableDictionary <NSNumber *, SWRequest *> *requestspool;
 @end
 
@@ -68,25 +65,21 @@ static dispatch_queue_t request_completion_callback_queue() {
 - (instancetype)init {
     self = [super init];
     if (self) {
-        // network configuration initial.
         _configuration = [SWNetworkConfiguration sharedConfiguration];
-        // network manager initial
         _manager = [[AFHTTPSessionManager alloc]initWithBaseURL:[NSURL URLWithString:_configuration.baseURL] sessionConfiguration:_configuration.sessionConfiguration];
         _manager.securityPolicy = _configuration.securityPolicy;
         _manager.completionQueue = request_completion_callback_queue();
         _manager.responseSerializer.acceptableContentTypes = _configuration.acceptableContentTypes;
         
-        // lock
         _lock = dispatch_semaphore_create(1);
         
-        // wshether to show activity indicator on status bar
         [AFNetworkActivityIndicatorManager sharedManager].enabled = _configuration.isShowActivityIndicator;
     }
     return self;
 }
 
 - (NSURLSessionTask *)pokeRequest:(SWRequest *)request {
-    // request can not be nil. 请求不能为空
+    // 请求不能为空
     NSParameterAssert(request != nil);
     
     __block NSURLSessionTask *sessionTask = nil;
@@ -96,24 +89,20 @@ static dispatch_queue_t request_completion_callback_queue() {
     
     request.sessionTask = sessionTask;
     if (sessionTask) {
-        // if session task is non-nil, add to requests pool.
+        // 如果请求任务不为空，则添加到请求池
         [self addRequestToPool:request];
         [sessionTask resume];
     }
     return sessionTask;
 }
 
-/**
- 处理请求结果方法
-
- @param task 对应的请求
- @param responseObject 请求返回数据
- @param error 请求返回错误信息
- */
+/// 处理请求结果方法
+/// @param task 对应的请求任务
+/// @param responseObject 请求返回数据
+/// @param error 请求返回错误信息
 - (void)handleRequestResult:(NSURLSessionTask *)task responseObject:(id)responseObject error:(NSError *)error {
     LOCK();
-    // get request from pool by task identifier.
-    // 从请求池中获取对应请求
+    // 根据任务id从请求池中获取对应请求
     SWRequest *request = self.requestspool[@(task.taskIdentifier)];
     UNLOCK();
     
@@ -130,7 +119,6 @@ static dispatch_queue_t request_completion_callback_queue() {
         
         switch (request.responseSerializerType) {
             case SWResponseSerializerTypeHTTP:
-                // Default serializer. Do nothing.
                 break;
             case SWResponseSerializerTypeJSON:
                 request.responseObject = [self.jsonResponseSerializer responseObjectForResponse:task.response data:request.responseData error:&serializationError];
@@ -160,19 +148,21 @@ static dispatch_queue_t request_completion_callback_queue() {
     });
 }
 
-/**
- 处理请求成功结果方法
-
- @param request 对应的请求
- */
+/// 处理请求成功结果方法
+/// @param request 对应的请求
 - (void)requestDidSucceedWithRequest:(SWRequest *)request {
+    // 若临时缓存数据存在，下载成功后删除
+    if ([request.responseObject isKindOfClass:[NSURL class]]) {
+        [SWFileManager removeFileIfExistAtPath:[[self incompleteDownloadTempPath:request.downloadPath] path]];
+    }
+    
     // 请求成功预处理回调
     if (_configuration.completeProcessBlock) {
         _configuration.completeProcessBlock(request);
     }
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        // 请求成功代理回调
+
         if ([request.delegate respondsToSelector:@selector(requestWillStop:)]) {
             [request.delegate requestWillStop:request];
         }
@@ -201,7 +191,14 @@ static dispatch_queue_t request_completion_callback_queue() {
 - (void)requestDidFailWithRequest:(SWRequest *)request error:(NSError *)error {
     request.error = error;
     
-    // Load response from file and clean up if download task failed.
+    // 保存已经下载的数据
+    NSData *incompleteDownloadData = error.userInfo[NSURLSessionDownloadTaskResumeData];
+    if (incompleteDownloadData) {
+        NSURL *localUrl = [self incompleteDownloadTempPath:request.downloadPath];
+        [incompleteDownloadData writeToURL:localUrl atomically:YES];
+    }
+    
+    // 如果下载失败，加载数据并清除本地数据
     if ([request.responseObject isKindOfClass:[NSURL class]]) {
         // 网络下载请求则转换下载数据
         NSURL *url = request.responseObject;
@@ -211,7 +208,8 @@ static dispatch_queue_t request_completion_callback_queue() {
         }
         request.responseObject = nil;
     }
-    // 请求失败预处理
+    
+    // 请求失败预处理回调
     if (_configuration.failProcessBlock) {
         _configuration.failProcessBlock(request);
     }
@@ -240,10 +238,11 @@ static dispatch_queue_t request_completion_callback_queue() {
     NSParameterAssert(request != nil);
     
     if (request.downloadPath) {
-        // 网络下载请求
+        // 保存已下载的数据
         NSURLSessionDownloadTask *requestTask = (NSURLSessionDownloadTask *)request.sessionTask;
         [requestTask cancelByProducingResumeData:^(NSData * _Nullable resumeData) {
-            
+            NSURL *localUrl = [self incompleteDownloadTempPath:request.downloadPath];
+            [resumeData writeToURL:localUrl atomically:YES];
         }];
     } else {
         [request.sessionTask cancel];
@@ -287,13 +286,9 @@ static dispatch_queue_t request_completion_callback_queue() {
     UNLOCK();
 }
 
-/**
- 发送网络请求统一方法
-
- @param request 对应的请求
- @param completionHandler 请求回调
- @return 返回当前请求请求任务
- */
+/// 发送网络请求统一方法
+/// @param request 对应的请求
+/// @param completionHandler 请求回调
 - (NSURLSessionTask *)dataTaskWithRequest:(SWRequest *)request
                         completionHandler:(void (^)(id _Nullable responseObject, NSError * _Nullable error))completionHandler {
     id params = request.parameters;
@@ -429,11 +424,9 @@ static dispatch_queue_t request_completion_callback_queue() {
     }
     
     NSString *downloadTargetPath;
-    BOOL isDirectory;
-    // 下载本地路径校验
-    if(![[NSFileManager defaultManager] fileExistsAtPath:downloadPath isDirectory:&isDirectory]) {
-        isDirectory = NO;
-    }
+    // 校验路径是否是文件夹
+    BOOL isDirectory = [SWFileManager isDirectoryPath:downloadPath];
+    
     if (isDirectory) {
         // 若下载路径为文件夹，则拼接下载链接文件名，设置为下载路径
         NSString *fileName = [request.URL lastPathComponent];
@@ -443,29 +436,48 @@ static dispatch_queue_t request_completion_callback_queue() {
         downloadTargetPath = downloadPath;
     }
     
-    // AFN use `moveItemAtURL` to move downloaded file to target path,
-    // this method aborts the move attempt if a file already exist at the path.
-    // So we remove the exist file before we start the download task.
     // 先校验本地是否存在文件，若存在先移除再下载
-    if ([[NSFileManager defaultManager] fileExistsAtPath:downloadTargetPath]) {
-        [[NSFileManager defaultManager] removeItemAtPath:downloadTargetPath error:nil];
-    }
+    [SWFileManager removeFileIfExistAtPath:downloadTargetPath];
 
+    BOOL isResumeDataExist = [[NSFileManager defaultManager] fileExistsAtPath:[[self incompleteDownloadTempPath:downloadPath] path]];
+    NSData *data = [NSData dataWithContentsOfURL:[self incompleteDownloadTempPath:downloadPath]];
+    BOOL resumeDataIsValid = [SWFileManager validateResumeData:data];
+
+    BOOL canBeResumed = isResumeDataExist && resumeDataIsValid;
+    BOOL resumeSucceeded = NO;
+    
     __block NSURLSessionDownloadTask *downloadTask = nil;
-    
-    downloadTask = [_manager downloadTaskWithRequest:request progress:downloadProgressBlock destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
-        return [NSURL fileURLWithPath:downloadTargetPath isDirectory:NO];
-    } completionHandler:
-                    ^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
-                        [self handleRequestResult:downloadTask responseObject:filePath error:error];
-                    }];
-    
+    // Try to resume with resumeData.
+    // Even though we try to validate the resumeData, this may still fail and raise excecption.
+    if (canBeResumed) {
+        @try {
+            downloadTask = [_manager downloadTaskWithResumeData:data progress:downloadProgressBlock destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
+                return [NSURL fileURLWithPath:downloadTargetPath isDirectory:NO];
+            } completionHandler:
+                            ^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
+                                [self handleRequestResult:downloadTask responseObject:filePath error:error];
+                            }];
+            resumeSucceeded = YES;
+        } @catch (NSException *exception) {
+            if (_configuration.logEnable) {
+                NSLog(@"Resume download failed, reason = %@", exception.reason);
+            }
+            resumeSucceeded = NO;
+        }
+    }
+    if (!resumeSucceeded) {
+       downloadTask = [_manager downloadTaskWithRequest:request progress:downloadProgressBlock destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
+            return [NSURL fileURLWithPath:downloadTargetPath isDirectory:NO];
+        } completionHandler:
+                        ^(NSURLResponse * _Nonnull response, NSURL * _Nullable filePath, NSError * _Nullable error) {
+                            [self handleRequestResult:downloadTask responseObject:filePath error:error];
+                        }];
+    }
     return downloadTask;
 }
 
 + (void)load {
-    // Starts monitoring for changes in network reachability status.
-    // 开启网络状态实时监听
+    // 程序启动时开启网络状态实时监听
     [[AFNetworkReachabilityManager sharedManager] startMonitoring];
 }
 
@@ -518,7 +530,6 @@ static dispatch_queue_t request_completion_callback_queue() {
     // 设置请求是否允许移动蜂窝网络请求，此处主要用于大流量请求操作配置
     requestSerializer.allowsCellularAccess = request.allowsCellularAccess;
     
-    // merge configuration.headerField and request.headerField, then add value to HTTPHeaderField
     // 将全局配置请求头与单个请求请求头合并
     NSMutableDictionary <NSString *, NSString *> *headerField = [NSMutableDictionary dictionary];
     if (_configuration.headerField) {
@@ -534,22 +545,16 @@ static dispatch_queue_t request_completion_callback_queue() {
     return requestSerializer;
 }
 
-/**
- 请求URL字符串异常处理，防止出现请求URL缺失等异常
-
- @param request 对应的请求
- */
+/// 请求URL字符串异常处理，防止出现请求URL缺失等异常
 - (NSString *)urlForRequest:(SWRequest *)request {
     NSParameterAssert(request != nil);
     
     NSString *path = request.path;
     NSURL *tempURL = [NSURL URLWithString:path];
-    // If detailUrl is valid URL
     // 如果请求Path为有效的URL
     if (tempURL && tempURL.host && tempURL.scheme) {
         return path;
     }
-    // URL slash compability
     NSString *baseURL;
     // 若单个请求设置了baseURL，则以单个请求为准
     if (request.baseURL && request.baseURL.length > 0) {
@@ -560,14 +565,44 @@ static dispatch_queue_t request_completion_callback_queue() {
     }
     NSURL *url = [NSURL URLWithString:baseURL];
     
+    // 防止因”/“引起的请求不成功
     if (baseURL.length > 0 && ![baseURL hasSuffix:@"/"]) {
         url = [url URLByAppendingPathComponent:@""];
     }
     if (path.length > 0 && [path hasPrefix:@"/"]) {
         path = [path substringFromIndex:1];
     }
-    
     return [NSURL URLWithString:path relativeToURL:url].absoluteString;
+}
+
+/// 获取未下载完成文件存储文件夹
+- (NSString *)incompleteDownloadTempCacheFolder {
+    NSFileManager *fileManager = [NSFileManager new];
+    static NSString *cacheFolder;
+
+    if (!cacheFolder) {
+        NSString *cacheDirectory = NSTemporaryDirectory();
+        cacheFolder = [cacheDirectory stringByAppendingPathComponent:kSWNetworkIncompleteDownloadFolderName];
+    }
+
+    // ensure all cache directories are there
+    NSError *error = nil;
+    if(![fileManager createDirectoryAtPath:cacheFolder withIntermediateDirectories:YES attributes:nil error:&error]) {
+        if (_configuration.logEnable) {
+            NSLog(@"Failed to create cache directory at %@", cacheFolder);
+        }
+        cacheFolder = nil;
+    }
+    return cacheFolder;
+}
+
+/// 获取对应下载文件的临时存储本地URL
+/// @param downloadPath 下载路径
+- (NSURL *)incompleteDownloadTempPath:(NSString *)downloadPath {
+    NSString *tempPath = nil;
+    NSString *md5URLString = [SWFileManager md5FromString:downloadPath];
+    tempPath = [[self incompleteDownloadTempCacheFolder] stringByAppendingPathComponent:md5URLString];
+    return [NSURL fileURLWithPath:tempPath];
 }
 
 - (NSMutableDictionary<NSNumber *,SWRequest *> *)requestspool {

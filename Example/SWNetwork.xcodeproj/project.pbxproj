@@ -27,6 +27,7 @@
 		EC43696224371FEB00451AB5 /* SWUpDownloadViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EC43696124371FEB00451AB5 /* SWUpDownloadViewController.m */; };
 		EC4888C8243496B900443B7D /* SWCustomRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = EC4888C7243496B900443B7D /* SWCustomRequest.m */; };
 		EC4888D32435837700443B7D /* SWRequestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EC4888D22435837700443B7D /* SWRequestViewController.m */; };
+		EC8BB9B3243D5F640046474B /* SWResumeUpDownloadViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = EC8BB9B2243D5F640046474B /* SWResumeUpDownloadViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -76,6 +77,8 @@
 		EC4888C7243496B900443B7D /* SWCustomRequest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SWCustomRequest.m; sourceTree = "<group>"; };
 		EC4888D12435837700443B7D /* SWRequestViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SWRequestViewController.h; sourceTree = "<group>"; };
 		EC4888D22435837700443B7D /* SWRequestViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SWRequestViewController.m; sourceTree = "<group>"; };
+		EC8BB9B1243D5F640046474B /* SWResumeUpDownloadViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SWResumeUpDownloadViewController.h; sourceTree = "<group>"; };
+		EC8BB9B2243D5F640046474B /* SWResumeUpDownloadViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SWResumeUpDownloadViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -150,6 +153,8 @@
 				EC4888D22435837700443B7D /* SWRequestViewController.m */,
 				EC43696024371FEB00451AB5 /* SWUpDownloadViewController.h */,
 				EC43696124371FEB00451AB5 /* SWUpDownloadViewController.m */,
+				EC8BB9B1243D5F640046474B /* SWResumeUpDownloadViewController.h */,
+				EC8BB9B2243D5F640046474B /* SWResumeUpDownloadViewController.m */,
 				EC4888D4243583DD00443B7D /* Requests */,
 				71719F9D1E33DC2100824A3D /* LaunchScreen.storyboard */,
 				6003F5A8195388D20070C39A /* Images.xcassets */,
@@ -397,6 +402,7 @@
 				6003F59A195388D20070C39A /* main.m in Sources */,
 				EC4888D32435837700443B7D /* SWRequestViewController.m in Sources */,
 				EC43696224371FEB00451AB5 /* SWUpDownloadViewController.m in Sources */,
+				EC8BB9B3243D5F640046474B /* SWResumeUpDownloadViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

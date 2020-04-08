@@ -9,6 +9,7 @@
 #import "SWViewController.h"
 #import "SWRequestViewController.h"
 #import "SWUpDownloadViewController.h"
+#import "SWResumeUpDownloadViewController.h"
 
 @interface SWViewController () <UITableViewDelegate, UITableViewDataSource>
 
@@ -56,6 +57,12 @@
         case 1:
         {
             SWUpDownloadViewController *updownloadVC = [[SWUpDownloadViewController alloc] init];
+            [self.navigationController pushViewController:updownloadVC animated:YES];
+        }
+            break;
+        case 2:
+        {
+            SWResumeUpDownloadViewController *updownloadVC = [[SWResumeUpDownloadViewController alloc] init];
             [self.navigationController pushViewController:updownloadVC animated:YES];
         }
             break;

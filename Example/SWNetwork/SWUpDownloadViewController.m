@@ -80,20 +80,18 @@
     [MBProgressHUD showHUDAddedTo:self.view animated:YES];
 
     // 下载路径
-    NSString *downloadDir = [[NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject] stringByAppendingPathComponent:@"test.jpg"];
+    NSString *downloadDir = [[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject] stringByAppendingPathComponent:@"test.jpg"];
        
-    [[SWNetworkAgent request:^(SWRequest * _Nonnull request) {
-        request.downloadPath = downloadDir;
-        request.path = @"https://tva3.sinaimg.cn/large/0072Vf1pgy1fodqpadh6zj31kw14nnpe.jpg";
-        request.progressBlock = ^(NSProgress * _Nonnull progress) {
-            CGFloat stauts = 100.f * progress.completedUnitCount/progress.totalUnitCount;
-            dispatch_async(dispatch_get_main_queue(), ^{
-                // 刷新UI需回归主线程
-                NSLog(@"download test progress ==== %@", [NSString stringWithFormat:@"%.2f", stauts/100.f]);
-            });
-        };
-        
-    }] startWithSuccess:^(SWRequest * _Nonnull request) {
+    SWRequest *request = Request(SWHTTPMethodGET, @"https://tva3.sinaimg.cn/large/0072Vf1pgy1fodqpadh6zj31kw14nnpe.jpg", nil);
+    request.downloadPath = downloadDir;
+    request.progressBlock = ^(NSProgress * _Nonnull progress) {
+        CGFloat stauts = 100.f * progress.completedUnitCount/progress.totalUnitCount;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            // 刷新UI需回归主线程
+            NSLog(@"download test progress ==== %@", [NSString stringWithFormat:@"%.2f", stauts/100.f]);
+        });
+    };
+    [request startWithSuccess:^(SWRequest * _Nonnull request) {
         
         NSLog(@"download test path === %@", request.responseObject);
         
@@ -108,7 +106,7 @@
 /// 并发下载
 - (void)batchDownload {
     // 下载路径
-    NSString *downloadDir = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) lastObject];
+    NSString *downloadDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
     NSString *localPath1 = [downloadDir stringByAppendingPathComponent:@"batch_download_1.jpg"];
     NSString *localPath2 = [downloadDir stringByAppendingPathComponent:@"batch_download_2.jpg"];
     NSString *localPath3 = [downloadDir stringByAppendingPathComponent:@"batch_download_3.jpg"];

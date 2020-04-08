@@ -28,78 +28,29 @@ typedef NS_ENUM(NSInteger, SWNetworkReachabilityStatus) {
  */
 @interface SWNetworkManager : NSObject
 
-/**
- \~chinese
- 是否有网络
- 
- \~english
- Whether or not the network is currently reachable.
- */
+/// 获取当前状态是否有网络
 @property (readonly, nonatomic, assign, getter = isReachable) BOOL reachable;
 
-/**
- \~chinese
- 是否是移动蜂窝网络
- 
- \~english
- Whether or not the network is currently reachable via WWAN.
- */
+/// 当前网络是否是移动蜂窝网络
 @property (readonly, nonatomic, assign, getter = isReachableViaWWAN) BOOL reachableViaWWAN;
 
-/**
- \~chinese
- 是否是无线网网络
- 
- \~english
- Whether or not the network is currently reachable via WiFi.
- */
+/// 当前网络是否是无线网网络
 @property (readonly, nonatomic, assign, getter = isReachableViaWiFi) BOOL reachableViaWiFi;
 
-/**
- \~chinese
- 初始化方法，返回单例对象
- 
- \~english
- Returns the shared network http session manager.
- */
+/// 初始化方法
 + (instancetype)shareManager;
 
-/**
- \~chinese
- 获取当前网络状态回调方法
- 
- \~english
- a callback to be executed when the network availability of the `baseURL` host changes.
- 
- @param networkStatus block A block object to be executed when the network availability of the `baseURL` host changes.. This block has no return value and takes a single argument which represents the various reachability states from the device to the `baseURL`.
- */
+/// 获取当前网络状态回调方法
+/// @param networkStatus 网络状态回调
 + (void)networkStatusWithBlock:(void(^)(SWNetworkReachabilityStatus status))networkStatus;
 
-/**
- \~chinese
- 发送请求
- 
- \~english
- Poke a request.
- */
+/// 发送请求
 - (__kindof NSURLSessionTask *)pokeRequest:(SWRequest *)request;
 
-/**
- \~chinese
- 取消请求
- 
- \~english
- Cancel a request that was previously added.
- */
+/// 取消请求
 - (void)cancelRequest:(SWRequest *)request;
 
-/**
- \~chinese
- 取消所有请求
- 
- \~english
- Cancel all requests that were previously added.
- */
+/// 取消所有请求
 - (void)cancelAllRequests;
 
 @end

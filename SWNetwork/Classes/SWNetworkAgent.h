@@ -12,117 +12,46 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class SWRequest, SWBatchRequest, SWChainRequest, SWBatchChainRequest;
 
-/**
- 网络请求协助类，此处主要维护并发请求、链式请求、并发链式请求
- 提供了单请求、并发请求、链式请求、并发链式请求block回调生成方法
- */
+
+/// 网络请求协助类，此处主要维护并发请求、链式请求、并发链式请求
+/// 提供了单请求、并发请求、链式请求、并发链式请求block回调生成方法
 @interface SWNetworkAgent : NSObject
 
-/**
- \~chinese
- 初始化方法，返回单例对象
- 
- \~english
- Returns the shared network agent.
- */
+/// 初始化方法
 + (instancetype)shareAgent;
 
-/**
- \~chinese
- 生成一个`SWRequest`对象
- 
- \~english
- Creates and returns a request object.
-
- @param configBlock Set the properties of the request.
- */
+/// 生成一个`SWRequest`对象
+/// @param configBlock 配置请求回调
 + (SWRequest *)request:(void(^)(SWRequest *request))configBlock;
 
-/**
- \~chinese
- 生成一个`SWBatchRequest`对象
- 
- \~english
- Creates and returns a batch request object.
- 
- @param configBlock Set the properties of the batch request.
- */
+/// 生成一个`SWBatchRequest`对象
+/// @param configBlock 配置请求回调
 + (SWBatchRequest *)batchRequest:(void(^)(SWBatchRequest *request))configBlock;
 
-/**
- \~chinese
- 生成一个`SWChainRequest`对象
- 
- \~english
- Creates and returns a chain request object.
- 
- @param configBlock Set the properties of the chain request.
- */
+/// 生成一个`SWChainRequest`对象
+/// @param configBlock 配置请求回调
 + (SWChainRequest *)chainRequest:(void(^)(SWChainRequest *request))configBlock;
 
-/**
- \~chinese
- 生成一个`SWBatchChainRequest`对象
- 
- \~english
- Creates and returns a batch chain request object.
-
- @param configBlock Set the properties of the batch chain request.
- */
+/// 生成一个`SWBatchChainRequest`对象
+/// @param configBlock 配置请求回调
 + (SWBatchChainRequest *)batchChainRequest:(void(^)(SWBatchChainRequest *request))configBlock;
 
-/**
- \~chinese
- 添加一个并发请求到维护数组
- 
- \~english
- Add a batch request.
- */
+/// 添加一个并发请求到维护数组
 - (void)addBatchRequest:(SWBatchRequest *)request;
 
-/**
- \~chinese
- 从维护数组移除一个并发请求
- 
- \~english
- Remove a previously added batch request.
- */
+/// 从维护数组移除一个并发请求
 - (void)removeBatchRequest:(SWBatchRequest *)request;
 
-/**
- \~chinese
- 添加一个链式请求到维护数组
- 
- \~english
- Add a chain request.
- */
+/// 添加一个链式请求到维护数组
 - (void)addChainRequest:(SWChainRequest *)request;
 
-/**
- \~chinese
- 从维护数组移除一个链式请求
- 
- \~english
- Remove a previously added chain request.
- */
+/// 从维护数组移除一个链式请求
 - (void)removeChainRequest:(SWChainRequest *)request;
 
-/**
- \~chinese
- 添加一个并发链式请求到维护数组
- 
- \~english
- Add a batch chain request.
- */
+/// 添加一个并发链式请求到维护数组
 - (void)addBatchChainRequest:(SWBatchChainRequest *)request;
 
-/**
- \~chinese
- 从维护数组移除一个并发链式请求
- 
- \~english
- Remove a previously added batch chain request.
- */
+/// 从维护数组移除一个并发链式请求
 - (void)removeBatchChainRequest:(SWBatchChainRequest *)request;
 
 @end

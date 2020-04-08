@@ -19,6 +19,7 @@
     [SWNetworkConfiguration sharedConfiguration].baseURL = @"https://ditu.amap.com/";
     // 设置全局请求的超时时间
     [SWNetworkConfiguration sharedConfiguration].timeoutInterval = 15;
+    [SWNetworkConfiguration sharedConfiguration].logEnable = YES;
     return YES;
 }
 

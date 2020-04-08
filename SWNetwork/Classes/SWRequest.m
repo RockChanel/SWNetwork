@@ -42,6 +42,7 @@ inline SWRequest *Request(SWHTTPMethod method, NSString *path, id parameters) {
     if ([_delegate respondsToSelector:@selector(requestWillStart:)]) {
         [_delegate requestWillStart:self];
     }
+    
     // 发送请求
     [[SWNetworkManager shareManager] pokeRequest:self];
     
@@ -54,6 +55,7 @@ inline SWRequest *Request(SWHTTPMethod method, NSString *path, id parameters) {
     if ([_delegate respondsToSelector:@selector(requestWillStop:)]) {
         [_delegate requestWillStop:self];
     }
+    
     self.delegate = nil;
     // 取消请求
     [[SWNetworkManager shareManager] cancelRequest:self];

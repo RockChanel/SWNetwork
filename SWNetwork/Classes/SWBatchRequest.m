@@ -15,8 +15,9 @@
 #define UNLOCK() dispatch_semaphore_signal(self->_lock)
 
 @interface SWBatchRequest() <SWRequestDelegate>
+/// 信号量锁
 @property (strong, nonatomic, nonnull) dispatch_semaphore_t lock;
-/// 记录已完成的请求个数
+/// 已完成的请求个数
 @property (nonatomic, assign) NSInteger completedCount;
 @end
 
@@ -40,18 +41,21 @@
 }
 
 - (void)start {
-    if ([_delegate respondsToSelector:@selector(batchRequestWillStart:)]) {
-        [_delegate batchRequestWillStart:self];
-    }
     if (_completedCount > 0) {
+        // 请求已经开始
         if ([SWNetworkConfiguration sharedConfiguration].isLogEnable) {
             NSLog(@"Error! Batch request has already started.");
         }
         return;
     }
+
     _failedRequest = nil;
     
     if (_requests.count > 0) {
+        if ([_delegate respondsToSelector:@selector(batchRequestWillStart:)]) {
+            [_delegate batchRequestWillStart:self];
+        }
+        
         [[SWNetworkAgent shareAgent] addBatchRequest:self];
         // 发送所有请求
         for (SWRequest *req in _requests) {
@@ -67,8 +71,8 @@
     else {
         if ([SWNetworkConfiguration sharedConfiguration].isLogEnable) {
             NSLog(@"Error! Batch request array is empty.");
-            [self clearCompletionBlock];
         }
+        [self clearCompletionBlock];
     }
 }
 
@@ -85,9 +89,7 @@
     }
 }
 
-/**
- 终止当前并发请求中所有请求
- */
+/// 终止当前并发请求中所有请求
 - (void)clearRequest {
     for (SWRequest *req in _requests) {
         [req stop];
@@ -112,11 +114,7 @@
     self.completedBlock = nil;
 }
 
-/**
- 单个请求请求成功代理事件回调
-
- @param request 对应的请求
- */
+/// 单个请求请求成功代理事件回调
 - (void)requestSuccessed:(SWRequest *)request {
     LOCK();
     _completedCount++;
@@ -145,17 +143,14 @@
     }
 }
 
-/**
- 单个请求请求失败代理事件回调
-
- @param request 对应的请求
- */
+/// 单个请求请求失败代理事件回调
 - (void)requestFailed:(SWRequest *)request {
     _failedRequest = request;
     
     if ([_delegate respondsToSelector:@selector(batchRequestWillStop:)]) {
         [_delegate batchRequestWillStop:self];
     }
+    
     for (SWRequest *req in _requests) {
         [req stop];
     }

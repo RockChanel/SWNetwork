@@ -12,13 +12,13 @@
 #import "SWNetworkConfiguration.h"
 
 @interface SWBatchChainRequest() <SWBatchRequestDelegate>
-/// The index of next request. Default is 0.
+/// 下一个请求索引，默认是0
 @property (nonatomic, assign) NSInteger nextRequestIndex;
-/// All the batch requests.
+/// 所有请求数组
 @property (nonatomic, strong) NSMutableArray <SWBatchRequest *> *requests;
-/// All the next callbacks.
+/// 所有请求执行完下一步回调
 @property (strong, nonatomic) NSMutableArray <SWNextBatchChainRequestBlock> *nextBlocks;
-
+/// 空回调
 @property (nonatomic, strong) SWNextBatchChainRequestBlock emptyBlock;
 
 @end
@@ -30,6 +30,7 @@
 }
 
 - (void)dealloc {
+    // 清空所有请求
     [self clearRequest];
 }
 
@@ -47,10 +48,10 @@
 }
 
 - (void)nextRequest:(SWBatchRequest *)request block:(SWNextBatchChainRequestBlock)block {
-    // request can not be nil. 请求不能为空
+    // 请求不能为空
     NSParameterAssert(request != nil);
-        
     [_requests addObject:request];
+    
     if (block != nil) {
         [_nextBlocks addObject:block];
     }
@@ -61,6 +62,7 @@
 
 - (void)start {
     if (_nextRequestIndex > 0) {
+        // 请求已经开始
         if ([SWNetworkConfiguration sharedConfiguration].isLogEnable) {
             NSLog(@"Error! Chain request has already started.");
         }
@@ -70,6 +72,7 @@
         if ([_delegate respondsToSelector:@selector(batchChainRequestWillStart:)]) {
             [_delegate batchChainRequestWillStart:self];
         }
+        
         [self startNextRequest];
         [[SWNetworkAgent shareAgent] addBatchChainRequest:self];
         
@@ -77,9 +80,11 @@
             [_delegate batchChainRequestDidStart:self];
         }
     } else {
+        // 还没有添加任何请求
         if ([SWNetworkConfiguration sharedConfiguration].isLogEnable) {
             NSLog(@"Error! Chain request array is empty.");
         }
+        [self clearCompletionBlock];
     }
 }
 
@@ -87,6 +92,7 @@
     if ([_delegate respondsToSelector:@selector(batchChainRequestWillStop:)]) {
         [_delegate batchChainRequestWillStop:self];
     }
+    
     [self clearRequest];
     [[SWNetworkAgent shareAgent] removeBatchChainRequest:self];
     
@@ -106,16 +112,19 @@
     self.completedBlock = completed;
 }
 
+/// 开始下一个请求
 - (void)startNextRequest {
     SWBatchRequest *request = _requests[_nextRequestIndex];
-    _nextRequestIndex++;
     request.delegate = self;
     [request clearCompletionBlock];
     [request start];
+    
+    _nextRequestIndex++;
 }
 
+/// 并发请求成功代理事件回调
 - (void)batchRequestSuccessed:(SWBatchRequest *)request {
-    
+    // 返回前一个请求的结果
     NSInteger currentRequestIndex = _nextRequestIndex - 1;
     SWNextBatchChainRequestBlock currentBlock = _nextBlocks[currentRequestIndex];
     currentBlock(request);
@@ -124,7 +133,7 @@
         [self startNextRequest];
     }
     else {
-        // All requests have been excuted.
+        // 全部请求都已完成，结束链式请求
         if ([_delegate respondsToSelector:@selector(batchChainRequestWillStop:)]) {
             [_delegate batchChainRequestWillStop:self];
         }
@@ -134,7 +143,6 @@
         if (_successBlock) {
             _successBlock(self);
         }
-        
         if ([_delegate respondsToSelector:@selector(batchChainRequestDidStop:)]) {
             [_delegate batchChainRequestDidStop:self];
         }
@@ -147,6 +155,7 @@
     }
 }
 
+/// 并发请求失败代理事件回调
 - (void)batchRequestFailed:(SWBatchRequest *)request {
     _failedRequest = request;
     
@@ -159,13 +168,13 @@
     if (_failureBlock) {
         _failureBlock(self);
     }
-    
     if ([_delegate respondsToSelector:@selector(batchChainRequestDidStop:)]) {
         [_delegate batchChainRequestDidStop:self];
     }
     if (_completedBlock) {
         _completedBlock(self);
     }
+    
     [self clearCompletionBlock];
     [[SWNetworkAgent shareAgent] removeBatchChainRequest:self];
 }
@@ -173,6 +182,7 @@
 - (void)clearRequest {
     NSInteger currentRequestIndex = _nextRequestIndex - 1;
     if (currentRequestIndex < 0) {
+        // 请求未开始
         if ([SWNetworkConfiguration sharedConfiguration].isLogEnable) {
             NSLog(@"Error! Chain request hasn't started yet.");
         }

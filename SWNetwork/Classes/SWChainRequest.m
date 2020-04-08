@@ -13,13 +13,13 @@
 #import "SWNetworkConfiguration.h"
 
 @interface SWChainRequest() <SWRequestDelegate>
-/// 下一个请求索引值，从0开始
+/// 下一个请求索引值，默认为0
 @property (nonatomic, assign) NSInteger nextRequestIndex;
 /// 所有请求数组
 @property (nonatomic, strong) NSMutableArray <SWRequest *> *requests;
 /// 所有请求执行完下一步回调
 @property (strong, nonatomic) NSMutableArray <SWNextChainRequestBlock> *nextBlocks;
-
+/// 空回调
 @property (nonatomic, strong) SWNextChainRequestBlock emptyBlock;
 
 @end
@@ -44,10 +44,10 @@
 }
 
 - (void)nextRequest:(SWRequest *)request block:(SWNextChainRequestBlock)block {
-    // request can not be nil. 请求不能为空
+    // 请求不能为空
     NSParameterAssert(request != nil);
-    
     [_requests addObject:request];
+    
     if (block != nil) {
         [_nextBlocks addObject:block];
     }
@@ -58,6 +58,7 @@
 
 - (void)start {
     if (_nextRequestIndex > 0) {
+        // 请求已开始
         if ([SWNetworkConfiguration sharedConfiguration].isLogEnable) {
             NSLog(@"Error! Chain request has already started.");
         }
@@ -67,6 +68,7 @@
         if ([_delegate respondsToSelector:@selector(chainRequestWillStart:)]) {
             [_delegate chainRequestWillStart:self];
         }
+        
         [self startNextRequest];
         [[SWNetworkAgent shareAgent] addChainRequest:self];
         
@@ -74,6 +76,7 @@
             [_delegate chainRequestDidStart:self];
         }
     } else {
+        // 
         if ([SWNetworkConfiguration sharedConfiguration].isLogEnable) {
             NSLog(@"Error! Chain request array is empty.");
         }
@@ -112,16 +115,11 @@
     [request start];
 }
 
-/**
- 单个请求请求成功代理事件回调
- 
- @param request 对应的请求
- */
+/// 单个请求请求成功代理事件回调
 - (void)requestSuccessed:(SWRequest *)request {
 
     NSInteger currentRequestIndex = _nextRequestIndex - 1;
     SWNextChainRequestBlock currentBlock = _nextBlocks[currentRequestIndex];
-    // SWRequest *nextRequest = _requests[_nextRequestIndex];
     currentBlock(request);
     
     if (_nextRequestIndex < _requests.count) {
@@ -129,7 +127,6 @@
         [self startNextRequest];
     }
     else {
-        // All requests have been excuted.
         // 所有请求都已执行完成
         if ([_delegate respondsToSelector:@selector(chainRequestWillStop:)]) {
             [_delegate chainRequestWillStop:self];
@@ -152,11 +149,7 @@
     }
 }
 
-/**
- 单个请求请求失败代理事件回调
- 
- @param request 对应的请求
- */
+/// 单个请求请求失败代理事件回调
 - (void)requestFailed:(SWRequest *)request {
     _failedRequest = request;
     
@@ -169,13 +162,13 @@
     if (_failureBlock) {
         _failureBlock(self);
     }
-    
     if ([_delegate respondsToSelector:@selector(chainRequestDidStop:)]) {
         [_delegate chainRequestDidStop:self];
     }
     if (_completedBlock) {
         _completedBlock(self);
     }
+    
     [self clearCompletionBlock];
     [[SWNetworkAgent shareAgent] removeChainRequest:self];
 }
