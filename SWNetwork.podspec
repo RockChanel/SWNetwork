@@ -30,7 +30,7 @@ TODO: Add long description of the pod here.
 
   s.ios.deployment_target = '8.0'
 
-  s.source_files = 'SWNetwork/Classes/*.{h,m}'
+  s.source_files = 'SWNetwork/Classes/*'
   
   # s.resource_bundles = {
   #   'SWNetwork' => ['SWNetwork/Assets/*.png']
