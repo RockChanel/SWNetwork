@@ -15,7 +15,7 @@ PODS:
   - AFNetworking/UIKit (3.2.1):
     - AFNetworking/NSURLSession
   - MBProgressHUD (1.2.0)
-  - SWNetwork (1.0.0):
+  - SWNetwork (1.1.0):
     - AFNetworking (~> 3.2.1)
 
 DEPENDENCIES:
@@ -35,7 +35,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   AFNetworking: b6f891fdfaed196b46c7a83cf209e09697b94057
   MBProgressHUD: 3ee5efcc380f6a79a7cc9b363dd669c5e1ae7406
-  SWNetwork: 1f2d5c7ff33a6848ce16912240f9556a5f15a174
+  SWNetwork: a73e605a52d6628f6fc1783d489633d1bc6adcb4
 
 PODFILE CHECKSUM: 61f4f8b61be13f2e9649a794f1ab2f1edbf31b17
 
