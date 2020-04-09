@@ -8,18 +8,26 @@
 
 #import "SWAppDelegate.h"
 #import <SWNetwork.h>
+#import <AFNetworking/AFNetworking.h>
 
 @implementation SWAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     // Override point for customization after application launch.
-    
+    SWNetworkConfiguration *config = [SWNetworkConfiguration sharedConfiguration];
     // 设置baseURL
-    [SWNetworkConfiguration sharedConfiguration].baseURL = @"https://ditu.amap.com/";
+    config.baseURL = @"https://ditu.amap.com/";
     // 设置全局请求的超时时间
-    [SWNetworkConfiguration sharedConfiguration].timeoutInterval = 15;
-    [SWNetworkConfiguration sharedConfiguration].logEnable = YES;
+    config.timeoutInterval = 15;
+    config.logEnable = YES;
+    
+    // 配置Https
+//    AFSecurityPolicy *securityPolicy = [AFSecurityPolicy policyWithPinningMode:AFSSLPinningModeNone];
+//    securityPolicy.allowInvalidCertificates = YES;
+//    securityPolicy.validatesDomainName = NO;
+//    config.securityPolicy = securityPolicy;
+    
     return YES;
 }
 

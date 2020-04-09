@@ -115,7 +115,6 @@
     }];
 }
 
-
 /// 并发请求
 - (void)batchRequest {
     [MBProgressHUD showHUDAddedTo:self.view animated:YES];

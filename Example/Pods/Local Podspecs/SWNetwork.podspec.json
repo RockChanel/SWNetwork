@@ -16,12 +16,12 @@
     "tag": "1.1.0"
   },
   "platforms": {
-    "ios": "8.0"
+    "ios": "9.0"
   },
   "source_files": "SWNetwork/Classes/*.{h,m}",
   "dependencies": {
     "AFNetworking": [
-      "~> 3.2.1"
+      "~> 4.0.0"
     ]
   }
 }

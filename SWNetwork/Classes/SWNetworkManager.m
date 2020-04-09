@@ -181,13 +181,9 @@ static dispatch_queue_t request_completion_callback_queue() {
     });
 }
 
-
-/**
- 处理请求失败结果方法
-
- @param request 对应的请求
- @param error 请求错误信息，此时错误信息可能为网络异常信息以及请求结果解析错误信息
- */
+/// 处理请求失败结果方法
+/// @param request 对应的请求
+/// @param error 请求错误信息，此时错误信息可能为网络异常信息以及请求结果解析错误信息
 - (void)requestDidFailWithRequest:(SWRequest *)request error:(NSError *)error {
     request.error = error;
     
@@ -268,18 +264,17 @@ static dispatch_queue_t request_completion_callback_queue() {
     }
 }
 
-/**
- 添加请求到请求池
- */
+/// 添加请求到请求池
+/// @param request 要添加的请求
 - (void)addRequestToPool:(SWRequest *)request {
     LOCK();
     self.requestspool[@(request.sessionTask.taskIdentifier)] = request;
     UNLOCK();
 }
 
-/**
- 从请求池移除请求
- */
+
+/// 从请求池移除请求
+/// @param request 要移除的请求
 - (void)removeRequestFromPool:(SWRequest *)request {
     LOCK();
     [self.requestspool removeObjectForKey:@(request.sessionTask.taskIdentifier)];
@@ -331,16 +326,12 @@ static dispatch_queue_t request_completion_callback_queue() {
     }
 }
 
-/**
- 发送普通请求方法
-
- @param method 请求方法
- @param requestSerializer 参数编码的序列化器
- @param URLString 请求完整URL字符串
- @param parameters 请求参数
- @param completionHandler 请求回调
- @return 返回当前请求请求任务
- */
+/// 发送普通请求方法
+/// @param method 请求方法
+/// @param requestSerializer 参数编码的序列化器
+/// @param URLString 请求路径
+/// @param parameters 请求参数
+/// @param completionHandler 请求结果回调
 - (NSURLSessionDataTask *)dataTaskWithHTTPMethod:(NSString *)method
                                requestSerializer:(AFHTTPRequestSerializer *)requestSerializer
                                        URLString:(NSString *)URLString
@@ -349,18 +340,14 @@ static dispatch_queue_t request_completion_callback_queue() {
     return [self dataTaskWithHTTPMethod:method uploadProgress:nil requestSerializer:requestSerializer URLString:URLString parameters:parameters constructingBodyWithBlock:nil completionHandler:completionHandler];
 }
 
-/**
- 发送普通请求方法
-
- @param method 请求方法
- @param uploadProgressBlock 上传进度回调
- @param requestSerializer 参数编码的序列化器
- @param URLString 请求完整URL字符串
- @param parameters 请求参数
- @param block 当POST请求方式为FormData形式，FormData配置回调参数
- @param completionHandler 请求回调
- @return 返回当前请求请求任务
- */
+/// 发送普通请求方法
+/// @param method 请求方法
+/// @param uploadProgressBlock 上传进度回调
+/// @param requestSerializer 参数编码的序列化器
+/// @param URLString 请求路径
+/// @param parameters 请求参数
+/// @param block 当POST请求方式为FormData形式，FormData配置回调参数
+/// @param completionHandler 请求结果回调
 - (NSURLSessionDataTask *)dataTaskWithHTTPMethod:(NSString *)method
                                   uploadProgress:(nullable void (^)(NSProgress *uploadProgress)) uploadProgressBlock
                                requestSerializer:(AFHTTPRequestSerializer *)requestSerializer
@@ -395,17 +382,13 @@ static dispatch_queue_t request_completion_callback_queue() {
     return dataTask;
 }
 
-/**
- 下载网络请求方法
-
- @param downloadPath 下载本地存储路径
- @param downloadProgressBlock 下载进度回调
- @param requestSerializer 参数编码的序列化器
- @param URLString 请求完整URL字符串
- @param parameters 请求参数
- @param completionHandler 请求回调
- @return 返回当前请求请求任务
- */
+/// 下载网络请求方法
+/// @param downloadPath 下载本地存储路径
+/// @param downloadProgressBlock 下载进度回调
+/// @param requestSerializer 参数编码的序列化器
+/// @param URLString 请求路径
+/// @param parameters 请求参数
+/// @param completionHandler 请求结果回调
 - (NSURLSessionDownloadTask *)downloadTaskWithDownloadPath:(NSString *)downloadPath
                                           downloadProgress:(void (^)(NSProgress *downloadProgress)) downloadProgressBlock requestSerializer:(AFHTTPRequestSerializer *)requestSerializer
                                                  URLString:(NSString *)URLString
@@ -447,8 +430,8 @@ static dispatch_queue_t request_completion_callback_queue() {
     BOOL resumeSucceeded = NO;
     
     __block NSURLSessionDownloadTask *downloadTask = nil;
-    // Try to resume with resumeData.
-    // Even though we try to validate the resumeData, this may still fail and raise excecption.
+    
+    // 尝试恢复下载数据
     if (canBeResumed) {
         @try {
             downloadTask = [_manager downloadTaskWithResumeData:data progress:downloadProgressBlock destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
@@ -465,6 +448,7 @@ static dispatch_queue_t request_completion_callback_queue() {
             resumeSucceeded = NO;
         }
     }
+    // 若恢复数据失败，重新下载
     if (!resumeSucceeded) {
        downloadTask = [_manager downloadTaskWithRequest:request progress:downloadProgressBlock destination:^NSURL * _Nonnull(NSURL * _Nonnull targetPath, NSURLResponse * _Nonnull response) {
             return [NSURL fileURLWithPath:downloadTargetPath isDirectory:NO];

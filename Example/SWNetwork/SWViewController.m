@@ -10,6 +10,7 @@
 #import "SWRequestViewController.h"
 #import "SWUpDownloadViewController.h"
 #import "SWResumeUpDownloadViewController.h"
+#import <SWNetwork.h>
 
 @interface SWViewController () <UITableViewDelegate, UITableViewDataSource>
 
@@ -30,6 +31,11 @@
         @{@"title": @"上传下载"},
         @{@"title": @"断点续传、断点下载"}
     ];
+    
+    // 监听网络，于真机测试
+    [SWNetworkManager networkStatusWithBlock:^(SWNetworkReachabilityStatus status) {
+        NSLog(@"Network Status Changed");
+    }];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
