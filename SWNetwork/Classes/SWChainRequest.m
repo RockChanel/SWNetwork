@@ -76,11 +76,11 @@
             [_delegate chainRequestDidStart:self];
         }
     } else {
-        // 
         if ([SWNetworkConfiguration sharedConfiguration].isLogEnable) {
             NSLog(@"Error! Chain request array is empty.");
         }
-        [self clearCompletionBlock];
+        // 当子请求数为0个，则默认直接请求成功
+        [self handleRequestSuccess];
     }
 }
 
@@ -128,23 +128,7 @@
     }
     else {
         // 所有请求都已执行完成
-        if ([_delegate respondsToSelector:@selector(chainRequestWillStop:)]) {
-            [_delegate chainRequestWillStop:self];
-        }
-        if ([_delegate respondsToSelector:@selector(chainRequestSuccessed:)]) {
-            [_delegate chainRequestSuccessed:self];
-        }
-        if (_successBlock) {
-            _successBlock(self);
-        }
-        if ([_delegate respondsToSelector:@selector(chainRequestDidStop:)]) {
-            [_delegate chainRequestDidStop:self];
-        }
-        if (_completedBlock) {
-            _completedBlock(self);
-        }
-        
-        [self clearCompletionBlock];
+        [self handleRequestSuccess];
         [[SWNetworkAgent shareAgent] removeChainRequest:self];
     }
 }
@@ -153,23 +137,7 @@
 - (void)requestFailed:(SWRequest *)request {
     _failedRequest = request;
     
-    if ([_delegate respondsToSelector:@selector(chainRequestWillStop:)]) {
-        [_delegate chainRequestWillStop:self];
-    }
-    if ([_delegate respondsToSelector:@selector(chainRequestFailed:)]) {
-        [_delegate chainRequestFailed:self];
-    }
-    if (_failureBlock) {
-        _failureBlock(self);
-    }
-    if ([_delegate respondsToSelector:@selector(chainRequestDidStop:)]) {
-        [_delegate chainRequestDidStop:self];
-    }
-    if (_completedBlock) {
-        _completedBlock(self);
-    }
-    
-    [self clearCompletionBlock];
+    [self handleRequestFailed];
     [[SWNetworkAgent shareAgent] removeChainRequest:self];
 }
 
@@ -198,6 +166,48 @@
     self.failureBlock = nil;
     self.completedBlock = nil;
 }
+
+/// 处理请求成功结果
+- (void)handleRequestSuccess {
+    if ([_delegate respondsToSelector:@selector(chainRequestWillStop:)]) {
+        [_delegate chainRequestWillStop:self];
+    }
+    if ([_delegate respondsToSelector:@selector(chainRequestSuccessed:)]) {
+        [_delegate chainRequestSuccessed:self];
+    }
+    if (_successBlock) {
+        _successBlock(self);
+    }
+    if ([_delegate respondsToSelector:@selector(chainRequestDidStop:)]) {
+        [_delegate chainRequestDidStop:self];
+    }
+    if (_completedBlock) {
+        _completedBlock(self);
+    }
+    [self clearCompletionBlock];
+}
+
+/// 处理请求失败结果
+- (void)handleRequestFailed {
+    if ([_delegate respondsToSelector:@selector(chainRequestWillStop:)]) {
+        [_delegate chainRequestWillStop:self];
+    }
+    if ([_delegate respondsToSelector:@selector(chainRequestFailed:)]) {
+        [_delegate chainRequestFailed:self];
+    }
+    if (_failureBlock) {
+        _failureBlock(self);
+    }
+    if ([_delegate respondsToSelector:@selector(chainRequestDidStop:)]) {
+        [_delegate chainRequestDidStop:self];
+    }
+    if (_completedBlock) {
+        _completedBlock(self);
+    }
+    
+    [self clearCompletionBlock];
+}
+
 
 - (NSArray<SWRequest *> *)requests {
     return _requests;

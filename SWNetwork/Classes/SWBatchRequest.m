@@ -51,11 +51,10 @@
 
     _failedRequest = nil;
     
+    if ([_delegate respondsToSelector:@selector(batchRequestWillStart:)]) {
+        [_delegate batchRequestWillStart:self];
+    }
     if (_requests.count > 0) {
-        if ([_delegate respondsToSelector:@selector(batchRequestWillStart:)]) {
-            [_delegate batchRequestWillStart:self];
-        }
-        
         [[SWNetworkAgent shareAgent] addBatchRequest:self];
         // 发送所有请求
         for (SWRequest *req in _requests) {
@@ -72,7 +71,8 @@
         if ([SWNetworkConfiguration sharedConfiguration].isLogEnable) {
             NSLog(@"Error! Batch request array is empty.");
         }
-        [self clearCompletionBlock];
+        // 当子请求数为0个，则默认直接请求成功
+        [self handleRequestSuccess];
     }
 }
 
@@ -122,23 +122,7 @@
     
     // 所有请求都已成功完成
     if (_completedCount == _requests.count) {
-        if ([_delegate respondsToSelector:@selector(batchRequestWillStop:)]) {
-            [_delegate batchRequestWillStop:self];
-        }
-        if ([_delegate respondsToSelector:@selector(batchRequestSuccessed:)]) {
-            [_delegate batchRequestSuccessed:self];
-        }
-        if (_successBlock) {
-            _successBlock(self);
-        }
-        if ([_delegate respondsToSelector:@selector(batchRequestDidStop:)]) {
-            [_delegate batchRequestDidStop:self];
-        }
-        if (_completedBlock) {
-            _completedBlock(self);
-        }
-        
-        [self clearCompletionBlock];
+        [self handleRequestSuccess];
         [[SWNetworkAgent shareAgent] removeBatchRequest:self];
     }
 }
@@ -147,6 +131,32 @@
 - (void)requestFailed:(SWRequest *)request {
     _failedRequest = request;
     
+    [self handleRequestFailed];
+    [[SWNetworkAgent shareAgent] removeBatchRequest:self];
+}
+
+/// 处理请求成功结果
+- (void)handleRequestSuccess {
+    if ([_delegate respondsToSelector:@selector(batchRequestWillStop:)]) {
+        [_delegate batchRequestWillStop:self];
+    }
+    if ([_delegate respondsToSelector:@selector(batchRequestSuccessed:)]) {
+        [_delegate batchRequestSuccessed:self];
+    }
+    if (_successBlock) {
+        _successBlock(self);
+    }
+    if ([_delegate respondsToSelector:@selector(batchRequestDidStop:)]) {
+        [_delegate batchRequestDidStop:self];
+    }
+    if (_completedBlock) {
+        _completedBlock(self);
+    }
+    [self clearCompletionBlock];
+}
+
+/// 处理请求失败结果
+- (void)handleRequestFailed {
     if ([_delegate respondsToSelector:@selector(batchRequestWillStop:)]) {
         [_delegate batchRequestWillStop:self];
     }
@@ -169,8 +179,6 @@
     }
     
     [self clearCompletionBlock];
-    [[SWNetworkAgent shareAgent] removeBatchRequest:self];
 }
-
 
 @end

@@ -68,11 +68,12 @@
         }
         return;
     }
+    
+    if ([_delegate respondsToSelector:@selector(batchChainRequestWillStart:)]) {
+        [_delegate batchChainRequestWillStart:self];
+    }
+    
     if (_requests.count > 0) {
-        if ([_delegate respondsToSelector:@selector(batchChainRequestWillStart:)]) {
-            [_delegate batchChainRequestWillStart:self];
-        }
-        
         [self startNextRequest];
         [[SWNetworkAgent shareAgent] addBatchChainRequest:self];
         
@@ -84,7 +85,8 @@
         if ([SWNetworkConfiguration sharedConfiguration].isLogEnable) {
             NSLog(@"Error! Chain request array is empty.");
         }
-        [self clearCompletionBlock];
+        // 当子请求数为0个，则默认直接请求成功
+        [self handleRequestSuccess];
     }
 }
 
@@ -134,23 +136,7 @@
     }
     else {
         // 全部请求都已完成，结束链式请求
-        if ([_delegate respondsToSelector:@selector(batchChainRequestWillStop:)]) {
-            [_delegate batchChainRequestWillStop:self];
-        }
-        if ([_delegate respondsToSelector:@selector(batchChainRequestSuccessed:)]) {
-            [_delegate batchChainRequestSuccessed:self];
-        }
-        if (_successBlock) {
-            _successBlock(self);
-        }
-        if ([_delegate respondsToSelector:@selector(batchChainRequestDidStop:)]) {
-            [_delegate batchChainRequestDidStop:self];
-        }
-        if (_completedBlock) {
-            _completedBlock(self);
-        }
-        
-        [self clearCompletionBlock];
+        [self handleRequestSuccess];
         [[SWNetworkAgent shareAgent] removeBatchChainRequest:self];
     }
 }
@@ -159,23 +145,7 @@
 - (void)batchRequestFailed:(SWBatchRequest *)request {
     _failedRequest = request;
     
-    if ([_delegate respondsToSelector:@selector(batchChainRequestWillStop:)]) {
-        [_delegate batchChainRequestWillStop:self];
-    }
-    if ([_delegate respondsToSelector:@selector(batchChainRequestFailed:)]) {
-        [_delegate batchChainRequestFailed:self];
-    }
-    if (_failureBlock) {
-        _failureBlock(self);
-    }
-    if ([_delegate respondsToSelector:@selector(batchChainRequestDidStop:)]) {
-        [_delegate batchChainRequestDidStop:self];
-    }
-    if (_completedBlock) {
-        _completedBlock(self);
-    }
-    
-    [self clearCompletionBlock];
+    [self handleRequestFailed];
     [[SWNetworkAgent shareAgent] removeBatchChainRequest:self];
 }
 
@@ -200,6 +170,47 @@
     self.successBlock = nil;
     self.failureBlock = nil;
     self.completedBlock = nil;
+}
+
+/// 处理请求成功结果
+- (void)handleRequestSuccess {
+    if ([_delegate respondsToSelector:@selector(batchChainRequestWillStop:)]) {
+        [_delegate batchChainRequestWillStop:self];
+    }
+    if ([_delegate respondsToSelector:@selector(batchChainRequestSuccessed:)]) {
+        [_delegate batchChainRequestSuccessed:self];
+    }
+    if (_successBlock) {
+        _successBlock(self);
+    }
+    if ([_delegate respondsToSelector:@selector(batchChainRequestDidStop:)]) {
+        [_delegate batchChainRequestDidStop:self];
+    }
+    if (_completedBlock) {
+        _completedBlock(self);
+    }
+    [self clearCompletionBlock];
+}
+
+/// 处理请求失败结果
+- (void)handleRequestFailed {
+    if ([_delegate respondsToSelector:@selector(batchChainRequestWillStop:)]) {
+        [_delegate batchChainRequestWillStop:self];
+    }
+    if ([_delegate respondsToSelector:@selector(batchChainRequestFailed:)]) {
+        [_delegate batchChainRequestFailed:self];
+    }
+    if (_failureBlock) {
+        _failureBlock(self);
+    }
+    if ([_delegate respondsToSelector:@selector(batchChainRequestDidStop:)]) {
+        [_delegate batchChainRequestDidStop:self];
+    }
+    if (_completedBlock) {
+        _completedBlock(self);
+    }
+    
+    [self clearCompletionBlock];
 }
 
 - (NSArray<SWBatchRequest *> *)requests {
