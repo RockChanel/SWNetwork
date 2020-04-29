@@ -109,9 +109,9 @@
 
 - (void)startNextRequest {
     SWRequest *request = _requests[_nextRequestIndex];
-    _nextRequestIndex++;
     request.delegate = self;
     [request clearCompletionBlock];
+    _nextRequestIndex++;
     [request start];
 }
 

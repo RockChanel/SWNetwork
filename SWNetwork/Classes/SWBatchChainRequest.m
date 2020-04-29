@@ -119,9 +119,8 @@
     SWBatchRequest *request = _requests[_nextRequestIndex];
     request.delegate = self;
     [request clearCompletionBlock];
-    [request start];
-    
     _nextRequestIndex++;
+    [request start];
 }
 
 /// 并发请求成功代理事件回调
