@@ -8,7 +8,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'SWNetwork'
-  s.version          = '1.1.2'
+  s.version          = '1.1.3'
   s.summary          = 'SWNetwork is a request util based on AFNetworking.'
 
 # This description is used to generate tags and improve search results.
@@ -18,7 +18,7 @@ Pod::Spec.new do |s|
 #   * Finally, don't worry about the indent, CocoaPods strips it!
 
   s.description      = <<-DESC
-TODO: Add long description of the pod here.
+'SWNetwork is a request util based on AFNetworking.'
                        DESC
 
   s.homepage         = 'https://github.com/RockChanel/SWNetwork'
