@@ -9,6 +9,7 @@
 #import "SWResumeUpDownloadViewController.h"
 #import <MBProgressHUD.h>
 #import <SWNetwork.h>
+#import <SWFileManager.h>
 
 @interface SWResumeUpDownloadViewController ()
 
@@ -39,6 +40,8 @@
 
 - (void)cancelAction {
     [self.downloadRequest stop];
+    NSString *downloadDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
+    NSLog(@"%@", [SWFileManager getDownloadTargetPathAtPath:downloadDir downloadURL:[NSURL URLWithString:@"http://dldir1.qq.com/qqfile/QQforMac/QQ_V5.4.0.dmg"]]);
 }
 
 - (void)downloadAction {

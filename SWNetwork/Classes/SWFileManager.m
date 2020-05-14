@@ -18,6 +18,19 @@
     return isDirectory;
 }
 
++ (NSString *)getDownloadTargetPathAtPath:(NSString *)downloadPath downloadURL:(NSURL *)downloadURL {
+    // 校验路径是否是文件夹
+    BOOL isDirectory = [SWFileManager isDirectoryPath:downloadPath];
+    if (isDirectory) {
+        // 若下载路径为文件夹，则拼接下载链接文件名，设置为下载路径
+        NSString *fileName = [downloadURL lastPathComponent];
+        return [NSString pathWithComponents:@[downloadPath, fileName]];
+    }
+    else {
+        return downloadPath;
+    }
+}
+
 + (void)removeFileIfExistAtPath:(NSString *)path {
     if ([[NSFileManager defaultManager] fileExistsAtPath:path]) {
         [[NSFileManager defaultManager] removeItemAtPath:path error:nil];

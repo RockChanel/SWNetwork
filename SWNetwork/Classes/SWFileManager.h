@@ -11,6 +11,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface SWFileManager : NSObject
 
+/// 获取下载文件真实目标路径
+/// @param downloadPath 下载路径
+/// @param downloadURL 下载URL
++ (NSString *)getDownloadTargetPathAtPath:(NSString *)downloadPath downloadURL:(NSURL *)downloadURL;
+
 /// 校验目标路径是否是文件夹
 /// @param path 目标路径
 + (BOOL)isDirectoryPath:(NSString *)path;

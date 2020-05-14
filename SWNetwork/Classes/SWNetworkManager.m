@@ -406,18 +406,7 @@ static dispatch_queue_t request_completion_callback_queue() {
         return nil;
     }
     
-    NSString *downloadTargetPath;
-    // 校验路径是否是文件夹
-    BOOL isDirectory = [SWFileManager isDirectoryPath:downloadPath];
-    
-    if (isDirectory) {
-        // 若下载路径为文件夹，则拼接下载链接文件名，设置为下载路径
-        NSString *fileName = [request.URL lastPathComponent];
-        downloadTargetPath = [NSString pathWithComponents:@[downloadPath, fileName]];
-    }
-    else {
-        downloadTargetPath = downloadPath;
-    }
+    NSString *downloadTargetPath = [SWFileManager getDownloadTargetPathAtPath:downloadPath downloadURL:request.URL];
     
     // 先校验本地是否存在文件，若存在先移除再下载
     [SWFileManager removeFileIfExistAtPath:downloadTargetPath];
