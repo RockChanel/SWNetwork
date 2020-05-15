@@ -10,14 +10,6 @@
 
 @implementation SWFileManager
 
-+ (BOOL)isDirectoryPath:(NSString *)path {
-    BOOL isDirectory;
-    if(![[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDirectory]) {
-        isDirectory = NO;
-    }
-    return isDirectory;
-}
-
 + (NSString *)getDownloadTargetPathAtPath:(NSString *)downloadPath downloadURL:(NSURL *)downloadURL {
     // 校验路径是否是文件夹
     BOOL isDirectory = [SWFileManager isDirectoryPath:downloadPath];
@@ -26,33 +18,21 @@
         NSString *fileName = [downloadURL lastPathComponent];
         return [NSString pathWithComponents:@[downloadPath, fileName]];
     }
-    else {
-        return downloadPath;
+    return downloadPath;
+}
+
++ (BOOL)isDirectoryPath:(NSString *)path {
+    BOOL isDirectory;
+    if(![[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDirectory]) {
+        isDirectory = NO;
     }
+    return isDirectory;
 }
 
 + (void)removeFileIfExistAtPath:(NSString *)path {
     if ([[NSFileManager defaultManager] fileExistsAtPath:path]) {
         [[NSFileManager defaultManager] removeItemAtPath:path error:nil];
     }
-}
-
-+ (NSString *)md5FromString:(NSString *)string {
-    // 判断传入的字符串是否为空
-    NSParameterAssert(string != nil && [string length] > 0);
-    // 转成utf-8字符串
-    const char *cString = [string UTF8String];
-    // 设置一个接收数组
-    unsigned char result[CC_MD5_DIGEST_LENGTH];
-    // 对字符串进行加密
-    CC_MD5(cString, (CC_LONG)strlen(cString), result);
-    
-    NSMutableString *md5String = [NSMutableString string];
-    // 转成32字节的16进制
-    for (int i = 0; i < CC_MD5_DIGEST_LENGTH; i ++) {
-        [md5String appendFormat:@"%02x", result[i]];
-    }
-    return md5String;
 }
 
 + (BOOL)validateResumeData:(NSData *)data {
@@ -76,5 +56,22 @@
     return YES;
 }
 
++ (NSString *)md5FromString:(NSString *)string {
+    // 判断传入的字符串是否为空
+    NSParameterAssert(string != nil && [string length] > 0);
+    // 转成utf-8字符串
+    const char *cString = [string UTF8String];
+    // 设置一个接收数组
+    unsigned char result[CC_MD5_DIGEST_LENGTH];
+    // 对字符串进行加密
+    CC_MD5(cString, (CC_LONG)strlen(cString), result);
+    
+    NSMutableString *md5String = [NSMutableString string];
+    // 转成32字节的16进制
+    for (int i = 0; i < CC_MD5_DIGEST_LENGTH; i ++) {
+        [md5String appendFormat:@"%02x", result[i]];
+    }
+    return md5String;
+}
 
 @end
