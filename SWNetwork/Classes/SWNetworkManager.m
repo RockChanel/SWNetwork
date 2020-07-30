@@ -375,7 +375,7 @@ static dispatch_queue_t request_completion_callback_queue() {
     }
     
     __block NSURLSessionDataTask *dataTask = nil;
-    dataTask = [_manager dataTaskWithRequest:request uploadProgress:nil downloadProgress:nil completionHandler:^(NSURLResponse * _Nonnull response, id  _Nullable responseObject, NSError * _Nullable error) {
+    dataTask = [_manager dataTaskWithRequest:request uploadProgress:uploadProgressBlock downloadProgress:nil completionHandler:^(NSURLResponse * _Nonnull response, id  _Nullable responseObject, NSError * _Nullable error) {
         completionHandler(responseObject, error);
     }];
     

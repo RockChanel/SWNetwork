@@ -7,7 +7,7 @@
 //
 
 #import "SWUpDownloadViewController.h"
-#import <SWNetwork.h>
+#import "SWNetwork.h"
 #import <MBProgressHUD.h>
 
 @interface SWUpDownloadViewController () <UITableViewDelegate, UITableViewDataSource, SWBatchRequestDelegate>
