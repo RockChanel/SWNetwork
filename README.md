@@ -15,7 +15,7 @@ SWNetwork is available through [CocoaPods](https://cocoapods.org). To install
 it, simply add the following line to your Podfile:
 
 ```ruby
-pod 'SWNetwork', '~>1.1.6'
+pod 'SWNetwork', '~>1.1.8'
 ```
 
 ## Usage
