@@ -1,6 +1,6 @@
 {
   "name": "SWNetwork",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "summary": "SWNetwork is a request util based on AFNetworking.",
   "description": "'SWNetwork is a request util based on AFNetworking.'",
   "homepage": "https://github.com/RockChanel/SWNetwork",
@@ -13,7 +13,7 @@
   },
   "source": {
     "git": "https://github.com/RockChanel/SWNetwork.git",
-    "tag": "1.2.0"
+    "tag": "1.2.1"
   },
   "platforms": {
     "ios": "9.0"
