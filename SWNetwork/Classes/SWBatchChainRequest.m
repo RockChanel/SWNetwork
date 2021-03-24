@@ -95,6 +95,7 @@
         [_delegate batchChainRequestWillStop:self];
     }
     
+    _delegate = nil;
     [self clearRequest];
     [[SWNetworkAgent shareAgent] removeBatchChainRequest:self];
     
@@ -163,6 +164,7 @@
     }
     [_requests removeAllObjects];
     [_nextBlocks removeAllObjects];
+    [self clearCompletionBlock];
 }
 
 - (void)clearCompletionBlock {

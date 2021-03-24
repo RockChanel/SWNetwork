@@ -88,6 +88,7 @@
     if ([_delegate respondsToSelector:@selector(chainRequestWillStop:)]) {
         [_delegate chainRequestWillStop:self];
     }
+    _delegate = nil;
     [self clearRequest];
     [[SWNetworkAgent shareAgent] removeChainRequest:self];
     
@@ -159,6 +160,7 @@
     }
     [_requests removeAllObjects];
     [_nextBlocks removeAllObjects];
+    [self clearCompletionBlock];
 }
 
 - (void)clearCompletionBlock {

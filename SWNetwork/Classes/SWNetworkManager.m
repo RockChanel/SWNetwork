@@ -511,6 +511,7 @@ static dispatch_queue_t request_completion_callback_queue() {
     if (request.headerField) {
         [headerField addEntriesFromDictionary:request.headerField];
     }
+    request.headerField = headerField;
     for (NSString *httpHeaderField in headerField.allKeys) {
         NSString *value = headerField[httpHeaderField];
         [requestSerializer setValue:value forHTTPHeaderField:httpHeaderField];
